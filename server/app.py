@@ -11,7 +11,6 @@ from config import app, db, api
 from models import User
 # Add your model imports
 
-
 # Views go here!
 class Signup(Resource):
     def post(self):
@@ -26,10 +25,10 @@ class Signup(Resource):
         )
 
         user.password_hash = data['password']
+        session['user_id'] = user.id
 
         db.session.add(user)
         db.session.commit()
-
         user_dict = user.to_dict()
         response = make_response(
             user_dict,
@@ -56,19 +55,18 @@ class Login(Resource):
         data = request.get_json()
         username = data.get('username')
         user = User.query.filter_by(username=username).first()
+        user_dict = user.to_dict()
+        print(user_dict)
 
         password = data.get('password')
-
-        try:
-            if user.authenticate(password):
-                session['user_id'] = user.id
-                user_dict = user.to_dict()
-                response = make_response(
-                    user_dict,
-                    200
-                )
-                return response
-        except:
+        if user.authenticate(password):
+            session['user_id'] = user.id
+            response = make_response(
+                user_dict,
+                200
+            )
+            return response
+        else:
             response = make_response(
                 {'error': 'Invalid credentials'},
                 401

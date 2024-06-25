@@ -13,9 +13,12 @@ class User(db.Model, SerializerMixin):
     _password_hash = db.Column(db.String)
     bio = db.Column(db.String(50), nullable=False)
 
+    def __repr__(self):
+        return f'User: {self.username}, email: {self.email}, bio:{self.bio}'
+
     @hybrid_property
     def password_hash(self):
-        raise AttributeError('Password not accessible')
+        return self._password_hash
 
     @password_hash.setter
     def password_hash(self, password):
