@@ -1,13 +1,14 @@
 import React from "react";
-// import Home from "./Home";
-// import Books from "./Books";
-// import NavBar from "./NavBar";
-// import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
+import { Link } from "react-router-dom";
+
 
 function App() {
-  return (
-    <></>
-  );
+    return (
+        <>
+        <h1>Welcome!</h1>
+        <p><Link to='/Signup'>Signup</Link> | <Link to='/Login'>Login</Link></p>
+        </>
+    )
 }
 
 export default App;

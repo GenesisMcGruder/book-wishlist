@@ -2,15 +2,16 @@ import React from "react";
 import "./index.css";
 import ReactDOM from "react-dom/client";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
+import App from "./components/App";
 import Books from "./components/Books";
-import Home from "./components/Home";
+// import Home from "./components/Home";
 import Signup from "./components/Signup";
 import Login from "./components/Login";
 import UserProfile from "./components/UserProfile";
 
 const router = createBrowserRouter([{
   path:'/',
-  element: <Home/>,
+  element: <App/>,
   errorElement: <div>404 Not Found</div>
 },{
   path:'/Books',
