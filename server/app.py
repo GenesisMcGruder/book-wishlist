@@ -83,6 +83,7 @@ class Logout(Resource):
             return {'error': 'No user to logout'}, 401
 
 
+
 api.add_resource(Signup, '/signup')
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, '/login')

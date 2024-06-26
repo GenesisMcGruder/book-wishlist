@@ -30,3 +30,15 @@ class User(db.Model, SerializerMixin):
         return bcrypt.check_password_hash(
             self._password_hash, password.encode('utf-8'))
     
+class Book(db.Model, SerializerMixin):
+    __tablename__ = "books"
+
+    id = db.Column(db.Integer, primary_key=True)
+    title = db.Column(db.String, nullable=False)
+    author = db.Column(db.String, nullable=False)
+    image = db.Column(db.String, nullable=False)
+    summary = db.Column(db.String(200))
+    page_count = db.Column(db.Integer)
+
+    def __repr__(self):
+        return f'Book: {self.title}, Author: {self.author}, Page Count: {self.page_count}, Summary: {self.summary}, Image URL: {self.image}'

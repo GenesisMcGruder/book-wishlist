@@ -8,13 +8,14 @@ from faker import Faker
 
 # Local imports
 from app import app
-from models import db, User
+from models import db, User, Book
 
 if __name__ == '__main__':
     fake = Faker()
     with app.app_context():
         print ('Deleteing data...')
         User.query.delete()
+        Book.query.delete()
         print("Starting seed...")
         users = []
         usernames = []
@@ -39,6 +40,26 @@ if __name__ == '__main__':
 
         db.session.add_all(users)
         db.session.commit() 
+
+
+        books = []
+        for i in range(15):
+            summary = fake.paragraph(nb_sentences=2)
+
+            book = Book(
+                title = fake.sentence(),
+                author = fake.name(),
+                summary = summary,
+                page_count = randint(1, 1000),
+                image = fake.image()
+            )
+
+            books.append(book)
+
+        db.session.add_all(books)
+        db.session.commit()
+    
+
 
         print('Complete!')
         # Seed code goes here!
