@@ -1,52 +1,38 @@
+import { useFormik } from "formik";
 import React from "react";
-import {useFormik} from 'formik';
-import * as Yup from "yup";
+import * as Yup from 'yup';
 
-function Signup(){
-
+function Login(){
     const formik = useFormik({
         initialValues:{
-            email:"",
             username: "",
-            password: "",
-            bio: ""   
+            password: ""
         },
         onSubmit: (values) => {
-            fetch('signup',{
-                method:"POST",
-                headers:{
-                    "Content-Type": "application/json",
+            fetch('login', {
+                method: 'POST',
+                headers: {
+                    "Content-Type":"application/json",
                 },
-                body:JSON.stringify(values, null, 2),
+                body:JSON.stringify(values, null , 2),
             }).then(
-                (res)=>{
-                    if (res.status === 200){
+                (res) => {
+                    if(res.status === 200){
                         console.log(values)
                     }
                 }
             )
         },
-        validationSchema: Yup.object({
-            email: Yup.string().required('Email is required').email('Invalid email'),
+        validatationSchema: Yup.object({
             username: Yup.string().required('Username is required'),
             password: Yup.string().required('Password is required'),
-            bio:Yup.string().required('Bio is required')
-        })
+        }) 
+
     })
     return(
         <>
-        <h1>Signup</h1>
+        <h1>Login</h1>
         <form className="form" onSubmit={formik.handleSubmit}>
-            <label>Email:</label>
-            <input className="form-input"
-            name="email"
-            type="text"
-            value={formik.values.email}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}/>
-            <div className="error">
-                {formik.errors.email && formik.touched.email && formik.errors.email}
-            </div><br/>
             <label>Username:</label>
             <input className="form-input"
             name="username"
@@ -66,20 +52,10 @@ function Signup(){
             onBlur={formik.handleBlur}/>
             <div className="error">
             {formik.errors.password && formik.touched.password && formik.errors.password}</div><br/>
-            <label>Bio:</label>
-            <input className="form-input"
-            name="bio"
-            type="text"
-            value={formik.values.bio}
-            onChange={formik.handleChange}
-            onBlur={formik.handleBlur}/>
-            <div className="error">
-            {formik.errors.bio && formik.touched.bio && formik.errors.bio}</div><br/>
             <button className="submit" type="submit">Submit</button>
         </form>
         </>
     )
 }
 
-
-export default Signup;
+export default Login;

@@ -1,10 +1,12 @@
 import React from "react";
-//import { Switch, Route } from "react-router-dom";
-import Home from "./Home";
+// import Home from "./Home";
+// import Books from "./Books";
+// import NavBar from "./NavBar";
+// import { BrowserRouter as Router, Route, Routes } from "react-router-dom";
 
 function App() {
   return (
-    <Home/>
+    <></>
   );
 }
 
