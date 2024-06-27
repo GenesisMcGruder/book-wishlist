@@ -70,6 +70,7 @@ if __name__ == '__main__':
         for i in range(num_wishlist):
 
             wishlist = Wishlist(
+                date_added = 
                 user_id = randint(1,10),
                 book_id = randint(1,15)
             )
