@@ -8,7 +8,7 @@ from flask_restful import Resource
 
 # Local imports
 from config import app, db, api
-from models import User
+from models import User, Book
 # Add your model imports
 
 # Views go here!
@@ -35,20 +35,6 @@ class Signup(Resource):
             200
         )
         return response
-
-class CheckSession(Resource):
-    def get(self):
-        user = User.query.filter(User.id == session.get('user_id')).first()
-
-        if user:
-            user_dict = user.to_dict()
-            response = make_response(
-                user_dict,
-                200
-            )
-            return response
-        else:
-            return {'error': 'Not logged in'}, 401
 
 class Login(Resource):
     def post(self):
@@ -82,12 +68,101 @@ class Logout(Resource):
         else:
             return {'error': 'No user to logout'}, 401
 
+class CheckSession(Resource):
+    def get(self):
+        user = User.query.filter(User.id == session.get('user_id')).first()
+
+        if user:
+            user_dict = user.to_dict()
+            response = make_response(
+                user_dict,
+                200
+            )
+            return response
+        else:
+            return {'error': 'Not logged in'}, 401
+
+
+class Books(Resource):
+    def get(self):
+        books = [book.to_dict() for book in Book.query.all()]
+        response = make_response(
+            books,
+            200
+        )
+        return response
+
+    def post(self):
+        data = request.get_json()
+        new_book = Book(
+            title = data['title'],
+            author = data['author'],
+            image = data['image'],
+            summary = data['summary'],
+            page_count = data['page_count']
+        )
+
+        db.session.add(new_book)
+        db.session.commit()
+
+        new_book_dict = new_book.to_dict()
+
+        response = make_response(
+            jsonify(new_book_dict),
+            200
+        )
+        return response
+
+class BooksByID(Resource):
+    def get(self,id):
+        book_dict = Book.query.filter_by(id=id).first().to_dict()
+        response = make_response(
+            book_dict,
+            200
+        )
+        return response
+
+    def patch(self,id):
+        book = Book.query.filter(Book.id==id).first()
+        for attr in request.form:
+            setattr(book, attr, request.form[attr])
+
+        db.session.add(book)
+        db.session.commit()
+
+        book_dict = book.to_dict()
+
+        response = make_response(
+            book_dict,
+            200
+        )
+
+        return response
+
+    def delete(self, id):
+        book = Book.query.filter_by(id=id).first()
+        db.session.delete(book)
+        db.session.commit
+
+        return make_response(
+            {'message':'Book successfully deleted'},
+            200
+        )
+
+# class UserByID(Resource):
+#     def get(self,id):
+#         user = User.query.filter(User.id == session.get('user_id')).first()
+
+
+
 
 
 api.add_resource(Signup, '/signup')
 api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
+api.add_resource(Books, '/books')
+api.add_resource(BooksByID, '/books/<int:id>')
 
 
 if __name__ == '__main__':

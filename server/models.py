@@ -42,3 +42,10 @@ class Book(db.Model, SerializerMixin):
 
     def __repr__(self):
         return f'Book: {self.title}, Author: {self.author}, Page Count: {self.page_count}, Summary: {self.summary}, Image URL: {self.image}'
+
+class Wishlist(db.Model, SerializerMixin):
+    __tablename__ = 'wishlist'
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer)
+    book_id = db.Column(db.Integer)

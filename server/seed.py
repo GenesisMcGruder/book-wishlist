@@ -2,13 +2,15 @@
 
 # Standard library imports
 from random import randint, choice as rc
+import random
 
 # Remote library imports
 from faker import Faker
+import requests
 
 # Local imports
 from app import app
-from models import db, User, Book
+from models import db, User, Book, Wishlist
 
 if __name__ == '__main__':
     fake = Faker()
@@ -46,18 +48,36 @@ if __name__ == '__main__':
         for i in range(15):
             summary = fake.paragraph(nb_sentences=2)
 
+            response = requests.get('https://picsum.photos/200')
+            image = response.url
+
             book = Book(
                 title = fake.sentence(),
                 author = fake.name(),
                 summary = summary,
                 page_count = randint(1, 1000),
-                image = fake.image()
+                image = image
             )
 
             books.append(book)
 
         db.session.add_all(books)
         db.session.commit()
+
+        
+        num_wishlist = 15
+        wishlists = []
+        for i in range(num_wishlist):
+
+            wishlist = Wishlist(
+                user_id = randint(1,10),
+                book_id = randint(1,15)
+            )
+
+            wishlists.append(wishlist)
+
+            db.session.add(wishlist)
+            db.session.commit()
     
 
 
