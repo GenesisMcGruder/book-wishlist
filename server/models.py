@@ -7,15 +7,17 @@ from config import db, bcrypt
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
+    serialize_rules = ("-books.user.wishlist.user",)
+
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, unique=True, nullable=False)
     username = db.Column(db.String, unique=True, nullable=False)
     _password_hash = db.Column(db.String)
     bio = db.Column(db.String(50), nullable=False)
 
-    wishlists = db.relationship('Wishlist', back_populates='user', cascade='all, delete-orphan')
+    wishlists_association = db.relationship('Wishlist', back_populates='user', cascade='all, delete-orphan')
 
-    books = association_proxy('wishlists', 'book',
+    wishlists_association = association_proxy('wishlists', 'book',
                                creator=lambda book_obj: Wishlist(book=book_obj))
 
     def __repr__(self):
@@ -34,9 +36,14 @@ class User(db.Model, SerializerMixin):
     def authenticate(self, password):
         return bcrypt.check_password_hash(
             self._password_hash, password.encode('utf-8'))
+
+    def wishlists(self):
+        return [wishlist.book for wishlist in self.wishlists_association]
     
 class Book(db.Model, SerializerMixin):
     __tablename__ = "books"
+
+    serialize_rules = (("-user", "wishlist.book.user"),)
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
@@ -61,7 +68,7 @@ class Wishlist(db.Model, SerializerMixin):
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'))  
 
-    user = db.relationship("User", back_populates='wishlists')
+    users = db.relationship("User", back_populates='wishlists')
     book = db.relationship('Book', back_populates='wishlists')
 
     def __repr__(self):

@@ -8,7 +8,7 @@ from flask_restful import Resource
 
 # Local imports
 from config import app, db, api
-from models import User, Book
+from models import User, Book #, Wishlist
 # Add your model imports
 
 # Views go here!
@@ -153,7 +153,18 @@ class BooksByID(Resource):
 #     def get(self,id):
 #         user = User.query.filter(User.id == session.get('user_id')).first()
 
+class WishlistByUserID(Resource):
+    def get(self, id):
+        user = User.query.filter_by(id=id).first()
+        wishlist_books = user.wishlists
 
+        wishlist_dict = [wishlist.to_dict() for wishlist in wishlist_books]
+
+        response = make_response(
+            jsonify(wishlist_dict),
+            200
+        )
+        return response
 
 
 
@@ -163,6 +174,7 @@ api.add_resource(Login, '/login')
 api.add_resource(Logout, '/logout')
 api.add_resource(Books, '/books')
 api.add_resource(BooksByID, '/books/<int:id>')
+api.add_resource(WishlistByUserID, '/wishlist_by_user/<int:id>')
 
 
 if __name__ == '__main__':
