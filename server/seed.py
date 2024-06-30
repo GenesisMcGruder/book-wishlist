@@ -3,6 +3,7 @@
 # Standard library imports
 from random import randint, choice as rc
 import random
+import datetime
 
 # Remote library imports
 from faker import Faker
@@ -18,6 +19,7 @@ if __name__ == '__main__':
         print ('Deleteing data...')
         User.query.delete()
         Book.query.delete()
+        Wishlist.query.delete()
         print("Starting seed...")
         users = []
         usernames = []
@@ -70,7 +72,7 @@ if __name__ == '__main__':
         for i in range(num_wishlist):
 
             wishlist = Wishlist(
-                date_added = 
+                # date_added = datetime.datetime.now(),
                 user_id = randint(1,10),
                 book_id = randint(1,15)
             )

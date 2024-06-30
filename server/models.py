@@ -3,11 +3,12 @@ from sqlalchemy.ext.associationproxy import association_proxy
 from sqlalchemy.ext.hybrid import hybrid_property
 
 from config import db, bcrypt
+import datetime
 
 class User(db.Model, SerializerMixin):
     __tablename__ = 'users'
 
-    serialize_rules = ("-books.user.wishlist.user",)
+    serialize_rules = ["-wishlists","-wishlists.user", "-wishlists.book.wishlists"]
 
     id = db.Column(db.Integer, primary_key=True)
     email = db.Column(db.String, unique=True, nullable=False)
@@ -15,10 +16,10 @@ class User(db.Model, SerializerMixin):
     _password_hash = db.Column(db.String)
     bio = db.Column(db.String(50), nullable=False)
 
-    wishlists_association = db.relationship('Wishlist', back_populates='user', cascade='all, delete-orphan')
+    wishlists = db.relationship('Wishlist', back_populates='user', cascade='all, delete-orphan')
 
-    wishlists_association = association_proxy('wishlists', 'book',
-                               creator=lambda book_obj: Wishlist(book=book_obj))
+    books = association_proxy('wishlists', 'book',
+                               creator=lambda book_obj: Wishlist(book=book))
 
     def __repr__(self):
         return f'User: {self.username}, email: {self.email}, bio:{self.bio}'
@@ -36,14 +37,11 @@ class User(db.Model, SerializerMixin):
     def authenticate(self, password):
         return bcrypt.check_password_hash(
             self._password_hash, password.encode('utf-8'))
-
-    def wishlists(self):
-        return [wishlist.book for wishlist in self.wishlists_association]
     
 class Book(db.Model, SerializerMixin):
     __tablename__ = "books"
 
-    serialize_rules = (("-user", "wishlist.book.user"),)
+    serialize_rules = ["-wishlists","-wishlists.book", "-wishlists.user.wishlists"]
 
     id = db.Column(db.Integer, primary_key=True)
     title = db.Column(db.String, nullable=False)
@@ -55,7 +53,7 @@ class Book(db.Model, SerializerMixin):
     wishlists = db.relationship('Wishlist',back_populates='book', cascade='all, delete-orphan')
 
     user = association_proxy('wishlists', 'user',
-                              creator=lambda user_obj: Wishlist(user=user_obj))
+                              creator=lambda user_obj: Wishlist(user=user))
 
     def __repr__(self):
         return f'Book: {self.title}, Author: {self.author}, Page Count: {self.page_count}, Summary: {self.summary}, Image URL: {self.image}'
@@ -63,12 +61,14 @@ class Book(db.Model, SerializerMixin):
 class Wishlist(db.Model, SerializerMixin):
     __tablename__ = 'wishlists'
 
+    serialize_rules = ["-wishlists","-user.wishlists", "-book.wishlists.user"]
+
     id = db.Column(db.Integer, primary_key=True)
-    date_added = db.Column(db.DateTime)
+    date_added = db.Column(db.DateTime, default = datetime.datetime.now())
     user_id = db.Column(db.Integer, db.ForeignKey('users.id'))
     book_id = db.Column(db.Integer, db.ForeignKey('books.id'))  
 
-    users = db.relationship("User", back_populates='wishlists')
+    user = db.relationship("User", back_populates='wishlists')
     book = db.relationship('Book', back_populates='wishlists')
 
     def __repr__(self):
