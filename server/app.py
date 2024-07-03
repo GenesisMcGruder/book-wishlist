@@ -16,23 +16,24 @@ from models import User, Book, Wishlist
 class Signup(Resource):
     def post(self):
         data = request.get_json()
-
+    
         if 'username' not in data:
             return {'error': 'Please enter desired username'}, 422
-        user = User(
+        new_user = User(
             email=data['email'],
             username=data['username'],
             bio=data['bio']
         )
 
-        user.password_hash = data['password']
-        session['user_id'] = user.id
-
-        db.session.add(user)
+        new_user.password_hash = data['password']
+        db.session.add(new_user)
         db.session.commit()
-        user_dict = user.to_dict()
+        
+        session['user_id'] = new_user.id
+
+        new_user_dict = new_user.to_dict()
         response = make_response(
-            user_dict,
+            new_user_dict,
             200
         )
         return response
@@ -43,7 +44,6 @@ class Login(Resource):
         username = data.get('username')
         user = User.query.filter_by(username=username).first()
         user_dict = user.to_dict()
-        print(user_dict)
 
         password = data.get('password')
         if user.authenticate(password):
@@ -61,7 +61,7 @@ class Login(Resource):
             return response
 
 class Logout(Resource):
-    def delete(self):
+    def delete(self, id):
         user = User.query.filter(User.id ==session.get('user_id')).first
         if user:
             session['user_id'] = None
@@ -69,27 +69,34 @@ class Logout(Resource):
         else:
             return {'error': 'No user to logout'}, 401
 
-# class CheckSession(Resource):
-#     def get(self):
-#         user = User.query.filter(User.id == session.get('user_id')).first()
+class CheckSession(Resource):
+    def get(self):
+        user_id = session.get('user_id')
+        
+        if user_id:
+            user = User.query.filter(User.id == user_id).first()
+            if user:
+                user_dict = user.to_dict()
+                response = make_response(
+                    user_dict,
+                    200
+                )
+                return response
+            else:
+                    return {'error': "User not found"}, 404
+        else:
+            return {'error': 'Not logged in'}, 401
 
-#         if user:
-#             user_dict = user.to_dict()
-#             response = make_response(
-#                 user_dict,
-#                 200
-#             )
-#             return response
-#         else:
-#             return {'error': 'Not logged in'}, 401
-
-@app.before_request
-def check_if_logged_in():
-    if 'user_id' not in session or not session['user_id']:
-        return jsonify({'error': 'Unauthorized'}), 401
+# @app.before_request
+# def check_if_logged_in():
+#     user = User.query.get(session['user_id'])
+#     if not user:
+#         return {'error':"Not logged in"}, 404
 
 class Books(Resource):
     def get(self):
+        if not session['user_id']:
+            return {'error': 'Not logged in'}
         books = [book.to_dict(rules=('-wishlists',)) for book in Book.query.all()]
         response = make_response(
             books,
@@ -128,9 +135,10 @@ class BooksByID(Resource):
         return response
 
     def patch(self,id):
+        data = request.get_json()
         book = Book.query.filter(Book.id==id).first()
-        for attr in request.form:
-            setattr(book, attr, request.form[attr])
+        for attr in data:
+            setattr(book, attr, data[attr])
 
         db.session.add(book)
         db.session.commit()
@@ -154,57 +162,20 @@ class BooksByID(Resource):
             200
         )
 
-class UserByID(Resource):
-    def get(self,id):
-        user = User.query.filter_by(id=id).first()
-
-        if user:
-            user_dict = user.to_dict(rules=('-wishlists',))
-            response = make_response(
-                user_dict,
-                200
-            )
-            return response
-
-    def patch(self,id):
-        user = User.query.filter(User.id == id).first()
-
-        if user:
-             for attr in request.form:
-                setattr(user, attr, request.form[attr])
-
-                db.session.add(user)
-                db.session.commit()
-
-                user_dict = user.to_dict(rules=('-wishlists',))
-
-                response = make_response(
-                    user_dict,
-                    200
-                )
-                return response
-
-    def delete(self,id):
-        user = User.query.filter(User.id==id).first()
-
-        if user:
-            db.session.delete(user)
-            db.session.commit()
-
-            return make_response(
-                {'message': 'Successfully deleted'},
-                200
-            )
 
 class WishlistByID(Resource):
     def get(self, id):
         user = User.query.filter_by(id=id).first()
 
+        if not user:
+            return make_response(jsonify(message="User not found"), 404)
+
         wishlist_books = user.wishlists
         user_wishlist = []
         for wishlist in wishlist_books:
             book = wishlist.book
-            user_wishlist.append(book.to_dict(rules=('-wishlists',)))
+            if wishlist.book:
+                user_wishlist.append(book.to_dict(rules=('-wishlists',)))
 
         response = make_response(
             jsonify(user_wishlist),
@@ -216,10 +187,19 @@ class WishlistByID(Resource):
 class AddToWishlist(Resource):
      def post(self):
         data = request.get_json()
-        new_wishlist= Wishlist(
-            user_id=data['user_id'],
-            book_id=data['book_id']
-         )
+        user_id=data.get('user_id')
+        book_id=data.get('book_id')
+
+        existing_book = Wishlist.query.filter_by(user_id=user_id, book_id=book_id).first()
+
+        if existing_book:
+            return {'error': f"Book {book_id} already exists in wishlist"}, 400
+        else:
+            new_wishlist= Wishlist(
+                user_id=user_id,
+                book_id=book_id
+            )
+
         db.session.add(new_wishlist)
         db.session.commit()
 
@@ -232,17 +212,61 @@ class AddToWishlist(Resource):
 
         return response
 
+class DeleteFromWishlist(Resource):
+       def delete(self,user_id, book_id):
+        wishlist_entry = Wishlist.query.filter_by(user_id = user_id, book_id = book_id).first()
+
+        if not wishlist_entry:
+            return {'message': 'Book not found in user wishlist'}
+
+        db.session.delete(wishlist_entry)
+        db.session.commit()
+
+        return make_response(
+            {'message':f'Book {book_id} deleted from user {user_id} wishlist'},
+            200
+        )
+
+
+class UpdateUser(Resource):
+    def patch(self,id):
+        user = User.query.filter(User.id == id).first()
+        data = request.get_json()
+
+        if not user:
+            return {'message': 'User not found'}, 404
+
+        if user:
+             for attr in data:
+                if attr == 'password':
+                    user.password_hash = data['password']
+                    setattr(user,attr, 'password' )
+                else:
+                    setattr(user, attr, data[attr])
+
+        db.session.add(user)
+        db.session.commit()
+
+        user_dict = user.to_dict(rules=('-wishlists',))
+
+        response = make_response(
+            user_dict,
+            200
+        )
+        return response
+
 
 
 api.add_resource(Signup, '/signup')
-# api.add_resource(CheckSession, '/check_session')
+api.add_resource(CheckSession, '/check_session')
 api.add_resource(Login, '/login')
-api.add_resource(Logout, '/logout')
+api.add_resource(Logout, '/logout/<int:id>')
 api.add_resource(Books, '/books')
 api.add_resource(BooksByID, '/books/<int:id>')
-api.add_resource(UserByID, '/user_by_id/<int:id>')
 api.add_resource(WishlistByID, '/wishlist_by_id/<int:id>')
 api.add_resource(AddToWishlist, '/add_to_wishlist')
+api.add_resource(UpdateUser, '/update_user/<int:id>')
+api.add_resource(DeleteFromWishlist, '/delete_from_wishlist/<int:user_id>/<int:book_id>')
 
 
 
