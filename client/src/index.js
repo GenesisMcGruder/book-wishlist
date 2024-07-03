@@ -1,40 +1,13 @@
 import React from "react";
+import App from "./components/App";
 import "./index.css";
 import ReactDOM from "react-dom/client";
-import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import App from "./components/App";
-import Books from "./components/Books";
-// import Home from "./components/Home";
-import Signup from "./components/Signup";
-import Login from "./components/Login";
-import UserProfile from "./components/UserProfile";
 
-const router = createBrowserRouter([{
-  path:'/',
-  element: <App/>,
-  errorElement: <div>404 Not Found</div>
-},{
-  path:'/Books',
-  element: <Books/>,
-  errorElement: <div>404 Not Found</div>
-},{
-  path:'/Signup',
-  element: <Signup/>,
-  errorElement: <div>404 Not Found</div>
-},{
-  path:'/Login',
-  element: <Login/>,
-  errorElement: <div>404 Not Found</div>
-},{
-  path:'/UserProfile',
-  element:<UserProfile/>,
-  errorElement: <div>404 Not Found</div>
-}]);
-
-ReactDOM.createRoot(document.getElementById('root')).render(
+const root = ReactDOM.createRoot(document.getElementById('root'));
+root.render(
   <React.StrictMode>
-    <RouterProvider router={router}/>
-  </React.StrictMode> 
+    <App />
+  </React.StrictMode>
 );
 
 // const container = document.getElementById("root");

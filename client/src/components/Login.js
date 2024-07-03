@@ -1,8 +1,10 @@
 import { useFormik } from "formik";
 import React from "react";
+import { Link, useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
 
-function Login(){
+function Login({setUser, fetchBooks}){
+    const navigate = useNavigate()
     const formik = useFormik({
         initialValues:{
             username: "",
@@ -18,7 +20,9 @@ function Login(){
             }).then(
                 (res) => {
                     if(res.status === 200){
-                        console.log(values)
+                        setUser(values)
+                        fetchBooks()
+                        navigate('/Books')
                     }
                 }
             )
@@ -30,9 +34,9 @@ function Login(){
 
     })
     return(
-        <>
-        <h1>Login</h1>
-        <form className="form" onSubmit={formik.handleSubmit}>
+        <div className="form-case">
+            <form className="form" onSubmit={formik.handleSubmit}>
+            <h1>Login</h1>
             <label>Username:</label>
             <input className="form-input"
             name="username"
@@ -46,15 +50,16 @@ function Login(){
             <label>Password:</label>
             <input className="form-input"
             name="password"
-            type="text"
+            type="password"
             value={formik.values.password}
             onChange={formik.handleChange}
             onBlur={formik.handleBlur}/>
             <div className="error">
             {formik.errors.password && formik.touched.password && formik.errors.password}</div><br/>
-            <button className="submit" type="submit">Submit</button>
+            <button className="login-btn" type="submit">Submit</button>
         </form>
-        </>
+        <Link to='/Signup' className="login-to-signup">Don't have an account? Signup here.</Link>
+        </div>
     )
 }
 

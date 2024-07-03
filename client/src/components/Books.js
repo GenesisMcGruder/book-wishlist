@@ -1,19 +1,17 @@
-import React, { useEffect, useState } from "react";
-import Bookcard from "./bookcard";
+import React from "react";
+import BookForm from "./BookForm";
 
-function Books(){
-    const [books, setBooks] = useState([])
-    useEffect(()=>{
-        fetch('/books')
-        .then((res)=> res.json())
-        .then((data)=> setBooks(data))
-    }, [])
+function Books({bookCards, showForm, handleClick}){
 
-    const bookCard = books.map((book)=> <Bookcard key={book.id} book={book}/>)
 return (
     <>
     <div className="books">
-        {bookCard}
+        <h1 className="books-header">Books</h1>
+        {showForm ? <BookForm handleClick={handleClick}/>: null}
+        <div className="show-book-form" onClick={handleClick}>Add a Book</div>
+        <div className="book-card-display">
+            {bookCards}   
+        </div>
     </div>
     </>
 )
