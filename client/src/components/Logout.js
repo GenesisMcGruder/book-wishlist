@@ -10,13 +10,12 @@ function Logout({user, handleLogout, setIsLoggedIn}){
         .then(()=>{
             handleLogout()
             setIsLoggedIn(false)
-            navigate('/')
         })
     }
     return(
         <div>
             <h1 className="logout-header">Are you sure you want to Logout?</h1>
-            <p className="yes-no"onClick={handleDelete}>Yes| <Link to='/Books'>No</Link></p>
+            <p className="yes-no"><Link to='/' onClick={handleDelete}>Yes</Link>| <Link to='/Books'>No</Link></p>
         </div>
     )
 }
