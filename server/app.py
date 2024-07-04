@@ -87,12 +87,6 @@ class CheckSession(Resource):
         else:
             return {'error': 'Not logged in'}, 401
 
-# @app.before_request
-# def check_if_logged_in():
-#     user = User.query.get(session['user_id'])
-#     if not user:
-#         return {'error':"Not logged in"}, 404
-
 class Books(Resource):
     def get(self):
         if not session['user_id']:

@@ -3,7 +3,7 @@ import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 import * as Yup from 'yup';
 
-function Login({setUser, fetchBooks}){
+function Login({setUser, fetchBooks, setIsLoggedIn, fetchWishlist}){
     const navigate = useNavigate()
     const formik = useFormik({
         initialValues:{
@@ -21,9 +21,11 @@ function Login({setUser, fetchBooks}){
                 (res) => {
                     if(res.status === 200){
                         setUser(values)
+                        setIsLoggedIn(true)
                         fetchBooks()
+                        fetchWishlist()
                         navigate('/Books')
-                    }
+                    } 
                 }
             )
         },

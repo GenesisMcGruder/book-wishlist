@@ -1,7 +1,7 @@
 import React from "react";
 import { Link, useNavigate } from "react-router-dom";
 
-function Logout({user, handleLogout}){
+function Logout({user, handleLogout, setIsLoggedIn}){
     const navigate = useNavigate()
     function handleDelete(){
         fetch(`/logout/${user.id}`,{
@@ -9,6 +9,7 @@ function Logout({user, handleLogout}){
         })
         .then(()=>{
             handleLogout()
+            setIsLoggedIn(false)
             navigate('/')
         })
     }

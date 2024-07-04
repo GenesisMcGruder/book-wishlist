@@ -3,7 +3,7 @@ import { useFormik } from "formik";
 import * as Yup from "yup";
 import { Link, useNavigate } from "react-router-dom";
 
-function Signup({setUser}) {
+function Signup({setUser, setIsLoggedIn, fetchBooks, fetchWishlist}) {
   const navigate = useNavigate();
   const formik = useFormik({
     initialValues: {
@@ -24,6 +24,9 @@ function Signup({setUser}) {
           if (res.ok) {
             console.log(values);
             setUser(values)
+            setIsLoggedIn(true)
+            fetchBooks()
+            fetchWishlist()
             navigate("/Books");
           } else {
             throw new Error("Network response was not ok");

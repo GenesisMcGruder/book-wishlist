@@ -18,7 +18,8 @@ function App() {
   const [user,setUser] = useState([])
   const [books, setBooks] = useState([])
   const [wishlists, setWishlists] = useState([])
-  const [showForm,setShowForm] = useState(false); 
+  const [showForm,setShowForm] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(false) 
 
   useEffect(()=>{
     fetch('check_session')
@@ -37,7 +38,7 @@ function App() {
       .catch((error)=> {
         console.error("Error checking session", error);
       })
-  },[])
+  },[isLoggedIn])
 
   function fetchBooks() {
     fetch(`/books`)
@@ -129,12 +130,24 @@ const bookCards = books.map((book)=>(
 
     return (
       <Router> 
-      <AppContext.Provider value={{user, bookCards, wishlists, handleClick, showForm}}/>
+      <AppContext.Provider 
+      value={{user, 
+      bookCards, 
+      wishlists, 
+      handleClick, 
+      showForm, 
+      setUser,
+      fetchBooks,
+      fetchWishlist, 
+      setIsLoggedIn,
+      addToWishlist,
+      deleteFromWishlist,
+      handleLogout}}>
         <NavBarWrapper/>
         <Routes>
           <Route path="/" element={<Home />}/> 
-          <Route path="/Signup" element={<Signup setUser={setUser} fetchBooks={fetchBooks}/>}/>
-          <Route path="/Login" element={<Login setUser={setUser} fetchBooks={fetchBooks}/>}/>
+          <Route path="/Signup" element={<Signup setUser={setUser} fetchBooks={fetchBooks} fetchWishlist={fetchWishlist}setIsLoggedIn={setIsLoggedIn}/>}/>
+          <Route path="/Login" element={<Login setUser={setUser} fetchBooks={fetchBooks} fetchWishlist={fetchWishlist} setIsLoggedIn={setIsLoggedIn}/>}/>
           <Route path="/Books"element={
             <Books 
             bookCards={bookCards}  
@@ -154,9 +167,10 @@ const bookCards = books.map((book)=>(
           <Route path="/Logout" element={
             <Logout 
             user={user} 
-            handleLogout={handleLogout}/>}/> 
+            handleLogout={handleLogout} 
+            setIsLoggedIn={setIsLoggedIn}/>}/> 
         </Routes>
-        <AppContext.Provider/>
+        </AppContext.Provider>
     </Router>
     )
 }
