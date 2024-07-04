@@ -2,7 +2,7 @@ import React from "react";
 import {useFormik} from 'formik';
 // import * as Yup from "yup";
 
-function UpdateUser({user}){
+function UpdateUser({user, setUser, setIsLoggedIn}){
     
     const formik = useFormik({
         initialValues: {
@@ -20,11 +20,9 @@ function UpdateUser({user}){
             body: JSON.stringify(values),
           })
             .then((res) => {
-              if (res.ok) {
-                console.log(values);
-              } else {
-                throw new Error("Network response was not ok");
-              }
+                console.log(values)
+                setUser(values)
+                setIsLoggedIn(true)
             })
             .catch((error) => {
               console.error("Error:", error);
@@ -41,7 +39,7 @@ function UpdateUser({user}){
     return (
         <div className="form-case">
       <form className="form" onSubmit={formik.handleSubmit}>
-        <h1>Signup</h1>
+        <h1>Update Profile</h1>
         <label>Email:</label>
         <input
           className="form-input"

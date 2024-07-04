@@ -19,7 +19,8 @@ function App() {
   const [books, setBooks] = useState([])
   const [wishlists, setWishlists] = useState([])
   const [showForm,setShowForm] = useState(false);
-  const [isLoggedIn, setIsLoggedIn] = useState(false) 
+  const [isLoggedIn, setIsLoggedIn] = useState(false)
+
 
   useEffect(()=>{
     fetch('check_session')
@@ -152,7 +153,8 @@ const bookCards = books.map((book)=>(
             <Books 
             bookCards={bookCards}  
             handleClick={handleClick} 
-            showForm={showForm}/>} />
+            showForm={showForm}
+            fetchBooks={fetchBooks}/>} />
           <Route path="/Wishlist" element={
             <Wishlist 
             wishlists={wishlists} 
@@ -163,7 +165,9 @@ const bookCards = books.map((book)=>(
             <UserProfile 
             user={user} 
             handleClick={handleClick} 
-            showForm={showForm}/>}/>
+            showForm={showForm}
+            setUser={setUser}
+            setIsLoggedIn={setIsLoggedIn}/>}/>
           <Route path="/Logout" element={
             <Logout 
             user={user} 

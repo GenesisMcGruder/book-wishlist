@@ -3,7 +3,7 @@ import {useFormik} from 'formik';
 import * as Yup from "yup";
 
 
-function BookForm({handleClick}){
+function BookForm({handleClick, fetchBooks}){
         const formik = useFormik({
             initialValues:{
                 title:"",
@@ -24,6 +24,7 @@ function BookForm({handleClick}){
                         if (res.status === 200){
                             actions.resetForm()
                             handleClick()
+                            fetchBooks()
                             console.log(values)
                         }
                     }
